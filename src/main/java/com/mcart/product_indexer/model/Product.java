@@ -48,4 +48,12 @@ public class Product {
 
     @Field(type = FieldType.Object, enabled = false)
     private Map<String, Object> attributes;
+
+    /** Version from source; used for conflict resolution during reindex. */
+    @Field(type = FieldType.Long)
+    private Long version;
+
+    /** Updated timestamp; reject older writes during reindex. */
+    @Field(type = FieldType.Date)
+    private java.time.Instant updatedAt;
 }

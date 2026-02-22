@@ -84,6 +84,10 @@ public class FirestoreToProductMapper {
 
         product.setAttributes(getMapValue(fields, FIELD_ATTRIBUTES));
 
+        // version/updatedAt from Firestore if present (for Eventarc events)
+        Long version = getLong(fields, "version");
+        if (version != null) product.setVersion(version);
+
         return product;
     }
 
@@ -95,6 +99,11 @@ public class FirestoreToProductMapper {
     private Integer getInteger(Map<String, FirestoreValue> fields, String key) {
         FirestoreValue v = fields.get(key);
         return v != null ? v.getInteger() : null;
+    }
+
+    private Long getLong(Map<String, FirestoreValue> fields, String key) {
+        FirestoreValue v = fields.get(key);
+        return v != null ? v.getLong() : null;
     }
 
     private Double getDouble(Map<String, FirestoreValue> fields, String key) {

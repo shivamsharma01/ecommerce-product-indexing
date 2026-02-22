@@ -52,9 +52,12 @@ public class ProductEventSubscriber {
     private void handleMessage(BasicAcknowledgeablePubsubMessage message) {
         try {
             String payload = message.getPubsubMessage().getData().toStringUtf8();
-            CloudEventEnvelope envelope = objectMapper.readValue(payload, CloudEventEnvelope.class);
-            productIndexerService.processEvent(envelope);
-            message.ack();
+            boolean processed = productIndexerService.processMessage(payload);
+            if (processed) {
+                message.ack();
+            } else {
+                message.nack();
+            }
         } catch (Exception ex) {
             log.error("Failed to process product event", ex);
             message.nack();
