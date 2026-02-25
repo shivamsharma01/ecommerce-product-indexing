@@ -3,7 +3,6 @@ package com.mcart.product_indexer.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
-import com.mcart.product_indexer.dto.CloudEventEnvelope;
 import com.mcart.product_indexer.service.ProductIndexerService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -13,11 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-/**
- * Pub/Sub pull subscriber for product Firestore events.
- * Eventarc publishes Firestore document events to the configured Pub/Sub topic;
- * this subscriber pulls messages and indexes products in Elasticsearch.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

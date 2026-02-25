@@ -1,17 +1,15 @@
 # Product Indexer Service
 
-Subscribes to Pub/Sub product events (from Firestore via Eventarc), and indexes/updates/deletes products in Elasticsearch. The search service reads from the same Elasticsearch index.
+Subscribes to Pub/Sub product events (from product service outbox), and indexes/updates/deletes products in Elasticsearch. The search service reads from the same Elasticsearch index.
 
 ## Architecture
 
 ```
-Firestore (product writes)
+Product Service (writes Firestore + outbox)
    ↓
-Eventarc (triggers on document changes)
+Pub/Sub topic (product-events)
    ↓
-Pub/Sub topic
-   ↓
-GKE Indexer (this service, pull subscription)
+Product Indexer (this service, pull subscription)
    ↓
 Elasticsearch
    ↓
@@ -20,9 +18,9 @@ Search Service (reads)
 
 ## Setup
 
-### 1. Eventarc + Pub/Sub
+### 1. Pub/Sub
 
-Create an Eventarc trigger for Firestore document events on the `products` collection, with a Pub/Sub topic as the destination. Create a pull subscription on that topic (e.g. `product-events-sub`).
+Product service publishes events to the `product-events` topic. Create a pull subscription (e.g. `product-events-sub`).
 
 ### 2. Configuration
 
@@ -32,36 +30,32 @@ Create an Eventarc trigger for Firestore document events on the `products` colle
 | `product-indexer.pubsub.enabled` | `true` | Enable Pub/Sub subscriber |
 | `product-indexer.pubsub.subscription` | `product-events-sub` | Pub/Sub subscription name |
 
-### 3. GCP Credentials
+### 3. GCP Credentials & IAM
 
 When running on GKE, use a workload identity or service account with:
 - `roles/pubsub.subscriber` on the subscription
+- `roles/datastore.user` (Cloud Datastore User) for Firestore read
 - Network access to Elasticsearch
 
 For local development, use `gcloud auth application-default login` or `GOOGLE_APPLICATION_CREDENTIALS`.
+
+**If you get PERMISSION_DENIED:** Ensure Cloud Firestore API is enabled. Try `roles/datastore.owner` temporarily to verify; then narrow to `roles/datastore.user` for production.
 
 ### 4. Elasticsearch
 
 Use the same Elasticsearch instance as the search service. The index `products` is created automatically on first write.
 
-## Firestore Document Schema
+## Event Types (ProductEventEnvelope)
 
-The indexer maps Firestore document fields to the Elasticsearch product schema:
+- `PRODUCT_CREATED` / `PRODUCT_UPDATED` → index or update in Elasticsearch
+- `PRODUCT_DELETED` → delete from Elasticsearch
 
-| Firestore field | Elasticsearch field |
-|-----------------|---------------------|
-| name | name |
-| description | description |
-| price | price |
-| category | categories (single-item list) |
-| categories | categories (list) |
-| stockQuantity | inStock (stockQuantity > 0) |
-| brand | brand |
-| imageUrl | imageUrl |
-| rating | rating |
-| attributes | attributes |
+## Reindex
 
-## Event Types
+To bulk reindex all products from Firestore into Elasticsearch (deletes index first, so users won't see old/deleted products):
 
-- `google.cloud.firestore.document.v1.written` → index or update in Elasticsearch
-- `google.cloud.firestore.document.v1.deleted` → delete from Elasticsearch
+```bash
+curl -X POST http://localhost:8085/admin/reindex
+```
+
+Response: `{"success":true,"indexedCount":42}`
