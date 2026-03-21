@@ -1,5 +1,6 @@
 package com.mcart.product_indexer.controller;
 
+import com.mcart.product_indexer.service.ReindexResult;
 import com.mcart.product_indexer.service.ReindexService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,11 @@ public class ReindexController {
 
     @PostMapping("/reindex")
     public ResponseEntity<Map<String, Object>> reindex() {
-        long count = reindexService.reindex();
+        ReindexResult result = reindexService.reindex();
         return ResponseEntity.ok(Map.of(
-                "success", true,
-                "indexedCount", count
+                "success", result.isCompleteSuccess(),
+                "indexedCount", result.indexedCount(),
+                "failedCount", result.failedCount()
         ));
     }
 }

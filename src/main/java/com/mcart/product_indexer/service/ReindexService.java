@@ -1,97 +1,61 @@
 package com.mcart.product_indexer.service;
 
 import com.mcart.product_indexer.config.ReindexGate;
-import com.mcart.product_indexer.repository.ProductFirestoreRepository;
+import com.mcart.product_indexer.elasticsearch.ProductElasticsearchIndex;
 import com.mcart.product_indexer.model.Product;
 import com.mcart.product_indexer.model.ProductFirestoreDocument;
+import com.mcart.product_indexer.repository.ProductFirestoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ReindexService {
 
-    private static final String PRODUCTS_INDEX = "products";
-
     private final ProductFirestoreRepository productFirestoreRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
+    private final ProductElasticsearchIndex productIndex;
+    private final FirestoreProductDocumentMapper firestoreProductDocumentMapper;
     private final ReindexGate reindexGate;
 
-    public long reindex() {
+    public ReindexResult reindex() {
         log.info("Starting full reindex (delete index, recreate, index all)");
         reindexGate.setReindexInProgress(true);
         try {
-            IndexOperations indexOps = elasticsearchOperations.indexOps(Product.class);
+            IndexOperations indexOps = productIndex.indexOperations();
 
             if (indexOps.exists()) {
                 indexOps.delete();
                 log.info("Deleted products index");
             }
 
-            // 2. Recreate index with mapping
             indexOps.createWithMapping();
             log.info("Created products index with mapping");
 
-            // 3. Index all products from Firestore (same FirestoreTemplate as product service)
-            Long count = productFirestoreRepository.findAll()
-                    .doOnNext(doc -> indexProduct(doc).blockLast())
-                    .count()
-                    .block();
-            log.info("Reindex complete: indexed {} products", count);
-            return count != null ? count : 0;
+            long indexed = 0;
+            long failed = 0;
+            for (ProductFirestoreDocument doc : productFirestoreRepository.findAll().toIterable()) {
+                if (doc == null) {
+                    failed++;
+                    log.warn("Skipping null Firestore document");
+                    continue;
+                }
+                try {
+                    Product product = firestoreProductDocumentMapper.toProduct(doc);
+                    productIndex.save(product);
+                    indexed++;
+                    log.debug("Indexed product: id={}", doc.getProductId());
+                } catch (Exception e) {
+                    failed++;
+                    log.error("Failed to index product id={}", doc.getProductId(), e);
+                }
+            }
+            log.info("Reindex complete: indexed {} products, {} failed", indexed, failed);
+            return new ReindexResult(indexed, failed);
         } finally {
             reindexGate.setReindexInProgress(false);
         }
-    }
-
-    private Flux<Void> indexProduct(ProductFirestoreDocument doc) {
-        try {
-            Product product = toProduct(doc);
-            elasticsearchOperations.save(product, IndexCoordinates.of(PRODUCTS_INDEX));
-            log.debug("Indexed product: id={}", doc.getProductId());
-            return Flux.empty();
-        } catch (Exception e) {
-            log.error("Failed to index product id={}", doc.getProductId(), e);
-            return Flux.empty();
-        }
-    }
-
-    private Product toProduct(ProductFirestoreDocument doc) {
-        Product product = new Product();
-        product.setId(doc.getProductId());
-        product.setName(doc.getName());
-        product.setDescription(doc.getDescription());
-        product.setPrice(doc.getPrice());
-
-        if (doc.getCategories() != null && !doc.getCategories().isEmpty()) {
-            product.setCategories(doc.getCategories());
-        } else if (doc.getCategory() != null) {
-            product.setCategories(Collections.singletonList(doc.getCategory()));
-        } else {
-            product.setCategories(Collections.emptyList());
-        }
-
-        product.setBrand(doc.getBrand());
-        product.setImageUrl(doc.getImageUrl());
-        product.setRating(doc.getRating());
-        product.setAttributes(doc.getAttributes());
-
-        if (doc.getInStock() != null) {
-            product.setInStock(doc.getInStock());
-        } else {
-            product.setInStock(doc.getStockQuantity() != null && doc.getStockQuantity() > 0);
-        }
-
-        product.setVersion(doc.getVersion());
-        product.setUpdatedAt(doc.getUpdatedAt() != null ? doc.getUpdatedAt().toInstant() : null);
-        return product;
     }
 }

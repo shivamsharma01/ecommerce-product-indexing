@@ -14,8 +14,10 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@Document(indexName = "products")
+@Document(indexName = Product.INDEX_NAME)
 public class Product {
+
+    public static final String INDEX_NAME = "products";
 
     @Id
     private String id;

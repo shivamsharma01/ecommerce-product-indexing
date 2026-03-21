@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: product-indexer
+  cloud:
+    gcp:
+      firestore:
+        enabled: true
+      project-id: my-project-chat-ai-487408
+      credentials:
+        location: file:/home/shivam-sharma/.gcp/my-project-chat-ai-487408-5604b2cd4107.json
+  elasticsearch:
+    uris: http://localhost:9200
+  data:
+    elasticsearch:
+      auto-index-creation: true
+      repositories:
+        enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Same issuer as user-service / product-service (OIDC). Override via JWT_ISSUER_URI.
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8180/realms/mcart}
+
+server:
+  port: 8085
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    elasticsearch:
+      enabled: true
+
+product-indexer:
+  pubsub:
+    enabled: true
+    subscription: product-events-sub

@@ -1,0 +1,12 @@
+.git
+.github
+.gradle
+build
+**/build
+.idea
+*.iml
+.vscode
+*.md
+k8s
+cloudbuild.yaml
+.dockerignore

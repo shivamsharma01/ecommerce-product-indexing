@@ -1,0 +1,62 @@
+# Cloud Build: Docker build → Artifact Registry → kubectl set image on GKE Deployment.
+#
+# Substitutions (override when running `gcloud builds submit`):
+#   _REGION, _PROJECT_ID, _SERVICE_NAME — required for image name and kubectl.
+#   _REPO — Artifact Registry repository id (Docker format).
+#   _K8S_CLUSTER, _K8S_LOCATION, _K8S_NAMESPACE — target GKE cluster.
+#   _K8S_DEPLOYMENT, _K8S_CONTAINER — Kubernetes Deployment name and container name (often same as _SERVICE_NAME).
+#
+# COMMIT_SHA is a built-in substitution when the build is triggered from a connected repository.
+# For manual submits, pass e.g. --substitutions=COMMIT_SHA=$(git rev-parse --short HEAD),_PROJECT_ID=...
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _REGION: us-central1
+  _PROJECT_ID: your-gcp-project-id
+  _REPO: mcart
+  _SERVICE_NAME: product-indexer
+  _K8S_CLUSTER: your-gke-cluster
+  _K8S_LOCATION: us-central1
+  _K8S_NAMESPACE: default
+  _K8S_DEPLOYMENT: product-indexer
+  _K8S_CONTAINER: product-indexer
+
+steps:
+  - id: docker-build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:latest'
+      - .
+
+  - id: gke-credentials
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - container
+      - clusters
+      - get-credentials
+      - '${_K8S_CLUSTER}'
+      - '--region'
+      - '${_K8S_LOCATION}'
+      - '--project'
+      - '${_PROJECT_ID}'
+
+  - id: kubectl-set-image
+    name: gcr.io/cloud-builders/kubectl
+    args:
+      - set
+      - image
+      - deployment/${_K8S_DEPLOYMENT}
+      - '${_K8S_CONTAINER}=${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--namespace'
+      - '${_K8S_NAMESPACE}'
+
+images:
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:${COMMIT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/${_SERVICE_NAME}:latest'
