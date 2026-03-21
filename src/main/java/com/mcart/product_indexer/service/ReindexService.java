@@ -70,8 +70,26 @@ public class ReindexService {
         product.setName(doc.getName());
         product.setDescription(doc.getDescription());
         product.setPrice(doc.getPrice());
-        product.setCategories(doc.getCategory() != null ? Collections.singletonList(doc.getCategory()) : Collections.emptyList());
-        product.setInStock(doc.getStockQuantity() != null && doc.getStockQuantity() > 0);
+
+        if (doc.getCategories() != null && !doc.getCategories().isEmpty()) {
+            product.setCategories(doc.getCategories());
+        } else if (doc.getCategory() != null) {
+            product.setCategories(Collections.singletonList(doc.getCategory()));
+        } else {
+            product.setCategories(Collections.emptyList());
+        }
+
+        product.setBrand(doc.getBrand());
+        product.setImageUrl(doc.getImageUrl());
+        product.setRating(doc.getRating());
+        product.setAttributes(doc.getAttributes());
+
+        if (doc.getInStock() != null) {
+            product.setInStock(doc.getInStock());
+        } else {
+            product.setInStock(doc.getStockQuantity() != null && doc.getStockQuantity() > 0);
+        }
+
         product.setVersion(doc.getVersion());
         product.setUpdatedAt(doc.getUpdatedAt() != null ? doc.getUpdatedAt().toInstant() : null);
         return product;

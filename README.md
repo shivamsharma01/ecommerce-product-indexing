@@ -45,6 +45,14 @@ For local development, use `gcloud auth application-default login` or `GOOGLE_AP
 
 Use the same Elasticsearch instance as the search service. The index `products` is created automatically on first write.
 
+### Elasticsearch document contract (shared with search)
+
+The indexer’s `com.mcart.product_indexer.model.Product` must stay aligned with `com.mcart.search.model.Product` in the **search** service: same index name (`products`), Java property names (camelCase JSON), and field mapping — including `name` as **text + `name.sort` keyword** for sorting and **`attributes` as a queryable object** (not `enabled: false`).
+
+If an index already existed with an older mapping, run **reindex** or delete the index so it is recreated with the current mapping.
+
+**Outbox payload (`ProductEventPayload`)** supports the same logical fields as the search API document, including optional `categories` (list), `brand`, `imageUrl`, `rating`, `inStock`, and `attributes` (object). Legacy single `category` and `stockQuantity` still work.
+
 ## Event Types (ProductEventEnvelope)
 
 - `PRODUCT_CREATED` / `PRODUCT_UPDATED` → index or update in Elasticsearch

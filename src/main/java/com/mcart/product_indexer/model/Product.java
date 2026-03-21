@@ -6,14 +6,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * Product document model for Elasticsearch.
- * Must match the schema used by the search service (index "products").
- */
 @Data
 @NoArgsConstructor
 @Document(indexName = "products")
@@ -22,7 +20,9 @@ public class Product {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "standard"),
+            otherFields = @InnerField(suffix = "sort", type = FieldType.Keyword))
     private String name;
 
     @Field(type = FieldType.Text, analyzer = "standard")
@@ -46,14 +46,12 @@ public class Product {
     @Field(type = FieldType.Boolean)
     private boolean inStock;
 
-    @Field(type = FieldType.Object, enabled = false)
+    @Field(type = FieldType.Object)
     private Map<String, Object> attributes;
 
-    /** Version from source; used for conflict resolution during reindex. */
     @Field(type = FieldType.Long)
     private Long version;
 
-    /** Updated timestamp; reject older writes during reindex. */
     @Field(type = FieldType.Date)
     private java.time.Instant updatedAt;
 }

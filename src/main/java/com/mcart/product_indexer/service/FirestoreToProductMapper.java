@@ -10,11 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Maps Firestore document fields to Elasticsearch Product.
- * Supports both product entity schema (name, description, price, category, stockQuantity)
- * and extended search schema (categories, brand, imageUrl, rating, attributes).
- */
 @Component
 public class FirestoreToProductMapper {
 
@@ -25,14 +20,12 @@ public class FirestoreToProductMapper {
     private static final String FIELD_CATEGORY = "category";
     private static final String FIELD_CATEGORIES = "categories";
     private static final String FIELD_STOCK_QUANTITY = "stockQuantity";
+    private static final String FIELD_IN_STOCK = "inStock";
     private static final String FIELD_BRAND = "brand";
     private static final String FIELD_IMAGE_URL = "imageUrl";
     private static final String FIELD_RATING = "rating";
     private static final String FIELD_ATTRIBUTES = "attributes";
 
-    /**
-     * Resolves the Elasticsearch document ID. Prefers "id" field from document if present.
-     */
     public String resolveDocumentId(String pathDocumentId, FirestoreDocument document) {
         if (document != null && document.getFields() != null) {
             FirestoreValue idVal = document.getFields().get(FIELD_ID);
@@ -46,13 +39,6 @@ public class FirestoreToProductMapper {
         return pathDocumentId;
     }
 
-    /**
-     * Maps a Firestore document to an Elasticsearch Product.
-     *
-     * @param documentId the document ID (used as Elasticsearch id)
-     * @param document   the Firestore document with fields
-     * @return Product for indexing, or null if document has no usable data
-     */
     public Product map(String documentId, FirestoreDocument document) {
         if (document == null || document.getFields() == null) {
             return null;
@@ -66,7 +52,6 @@ public class FirestoreToProductMapper {
         product.setDescription(getString(fields, FIELD_DESCRIPTION));
         product.setPrice(getDouble(fields, FIELD_PRICE));
 
-        // category (single) or categories (list)
         List<String> categories = getStringList(fields, FIELD_CATEGORIES);
         if (categories == null || categories.isEmpty()) {
             String category = getString(fields, FIELD_CATEGORY);
@@ -78,13 +63,16 @@ public class FirestoreToProductMapper {
         product.setImageUrl(getString(fields, FIELD_IMAGE_URL));
         product.setRating(getDouble(fields, FIELD_RATING));
 
-        // inStock: from stockQuantity > 0, or explicit inStock boolean
-        Integer stockQty = getInteger(fields, FIELD_STOCK_QUANTITY);
-        product.setInStock(stockQty != null && stockQty > 0);
+        FirestoreValue inStockVal = fields.get(FIELD_IN_STOCK);
+        if (inStockVal != null && inStockVal.getBoolean() != null) {
+            product.setInStock(Boolean.TRUE.equals(inStockVal.getBoolean()));
+        } else {
+            Integer stockQty = getInteger(fields, FIELD_STOCK_QUANTITY);
+            product.setInStock(stockQty != null && stockQty > 0);
+        }
 
         product.setAttributes(getMapValue(fields, FIELD_ATTRIBUTES));
 
-        // version/updatedAt from Firestore if present (for Eventarc events)
         Long version = getLong(fields, "version");
         if (version != null) product.setVersion(version);
 

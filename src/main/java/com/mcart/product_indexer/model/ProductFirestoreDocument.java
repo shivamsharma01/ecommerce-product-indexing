@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Document(collectionName = "products")
 @Getter
@@ -23,7 +25,12 @@ public class ProductFirestoreDocument {
     private String sku;
     private Integer stockQuantity;
     private String category;
-
+    private List<String> categories;
+    private String brand;
+    private String imageUrl;
+    private Double rating;
+    private Map<String, Object> attributes;
+    private Boolean inStock;
     private long version;
     private Date createdAt;
     private Date updatedAt;

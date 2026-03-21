@@ -6,11 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Payload for product events from product service outbox.
- * Matches ProductEventPayload in product service.
- */
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,4 +25,11 @@ public class ProductEventPayload {
     private String sku;
     private Integer stockQuantity;
     private String category;
+    private List<String> categories;
+
+    private String brand;
+    private String imageUrl;
+    private Double rating;
+    private Boolean inStock;
+    private Map<String, Object> attributes;
 }

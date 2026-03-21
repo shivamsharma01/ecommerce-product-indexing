@@ -5,10 +5,8 @@ import com.mcart.product_indexer.model.Product;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
 
-/**
- * Maps ProductEventPayload (from product service outbox) to Elasticsearch Product.
- */
 @Component
 public class ProductEventMapper {
 
@@ -22,8 +20,27 @@ public class ProductEventMapper {
         product.setName(payload.getName());
         product.setDescription(payload.getDescription());
         product.setPrice(payload.getPrice() != null ? payload.getPrice().doubleValue() : null);
-        product.setCategories(payload.getCategory() != null ? Collections.singletonList(payload.getCategory()) : Collections.emptyList());
-        product.setInStock(payload.getStockQuantity() != null && payload.getStockQuantity() > 0);
+
+        List<String> categories = payload.getCategories();
+        if (categories != null && !categories.isEmpty()) {
+            product.setCategories(categories);
+        } else if (payload.getCategory() != null) {
+            product.setCategories(Collections.singletonList(payload.getCategory()));
+        } else {
+            product.setCategories(Collections.emptyList());
+        }
+
+        product.setBrand(payload.getBrand());
+        product.setImageUrl(payload.getImageUrl());
+        product.setRating(payload.getRating());
+        product.setAttributes(payload.getAttributes());
+
+        if (payload.getInStock() != null) {
+            product.setInStock(payload.getInStock());
+        } else {
+            product.setInStock(payload.getStockQuantity() != null && payload.getStockQuantity() > 0);
+        }
+
         product.setVersion(payload.getVersion());
         product.setUpdatedAt(payload.getUpdatedAt());
 
