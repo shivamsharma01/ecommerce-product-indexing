@@ -1,32 +1,21 @@
 package com.mcart.product_indexer;
 
-import com.mcart.product_indexer.support.IntegrationTestJwtConfig;
+import com.mcart.product_indexer.elasticsearch.ProductElasticsearchIndex;
+import com.mcart.product_indexer.repository.ProductFirestoreRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
-@Testcontainers
 @SpringBootTest
-@Import(IntegrationTestJwtConfig.class)
+@ActiveProfiles("test")
 class ProductIndexerApplicationTests {
 
-	@Container
-	static ElasticsearchContainer elasticsearch = new ElasticsearchContainer(
-			DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.21"))
-			.withEnv("discovery.type", "single-node");
+	@MockBean
+	private ProductElasticsearchIndex productElasticsearchIndex;
 
-	@DynamicPropertySource
-	static void configureProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.elasticsearch.uris", () -> "http://" + elasticsearch.getHttpHostAddress());
-		registry.add("product-indexer.pubsub.enabled", () -> "false");
-		registry.add("spring.cloud.gcp.pubsub.enabled", () -> "false");
-	}
+	@MockBean
+	private ProductFirestoreRepository productFirestoreRepository;
 
 	@Test
 	void contextLoads() {

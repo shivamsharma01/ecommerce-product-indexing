@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    gcp:
+      firestore:
+        enabled: false
+      pubsub:
+        enabled: false
+
+product-indexer:
+  pubsub:
+    enabled: false

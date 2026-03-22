@@ -23,7 +23,8 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health", "/health/**").permitAll()
-                        .requestMatchers("/product-indexer/admin", "/product-indexer/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/product-indexer/admin", "/product-indexer/admin/**")
+                                .hasAuthority("SCOPE_product.admin")
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtRoleConverter)));
