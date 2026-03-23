@@ -16,7 +16,7 @@ Consumes **product-events** from Pub/Sub, upserts/deletes documents in **Elastic
 | Variable | Purpose |
 |----------|---------|
 | `SPRING_ELASTICSEARCH_URIS` | ES cluster URL |
-| `SPRING_CLOUD_GCP_PROJECT_ID` | GCP project |
+| `GCP_PROJECT_ID` | GCP project |
 | `SPRING_CLOUD_GCP_FIRESTORE_ENABLED` | Firestore client |
 | `PRODUCT_INDEXER_PUBSUB_ENABLED` | Start subscriber (`true` in prod) |
 | `PRODUCT_INDEXER_PUBSUB_SUBSCRIPTION` | e.g. `product-events-sub` |
@@ -39,4 +39,4 @@ Typical IAM: Pub/Sub subscriber on the subscription, Firestore reader, network a
 
 ## Kubernetes
 
-Manifests under **`ecomm-infra/deploy/k8s/apps/product-indexer/`** (ServiceAccount, Deployment, Service, ConfigMap, optional ExternalSecret for ES credentials).
+Manifests under **`ecomm-infra/deploy/k8s/apps/product-indexer/`** (ServiceAccount, Deployment, Service, ConfigMap; optional `secret.yaml` from `secret.example.yaml` for ES credentials).
