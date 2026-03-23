@@ -16,7 +16,7 @@ RUN ./gradlew bootJar --no-daemon -x test \
     && JAR_FILE=$(ls build/libs/*.jar | grep -v plain | head -n1) \
     && mkdir -p /app/layers \
     && cd /app/layers \
-    && java -Djarmode=layertools -jar "$JAR_FILE" extract
+    && java -Djarmode=layertools -jar "/app/$JAR_FILE" extract
 
 FROM eclipse-temurin:17-jre-alpine AS runtime
 
