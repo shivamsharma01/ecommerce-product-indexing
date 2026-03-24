@@ -3,10 +3,8 @@ package com.mcart.product_indexer.service;
 import com.mcart.product_indexer.model.Product;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 final class ProductCoreFieldMapping {
 
@@ -19,9 +17,8 @@ final class ProductCoreFieldMapping {
             String description,
             Double price,
             List<String> categories,
-            String legacyCategory,
             String brand,
-            String imageUrl,
+            List<String> imageUrls,
             Double rating,
             Map<String, Object> attributes,
             Boolean inStock,
@@ -31,27 +28,13 @@ final class ProductCoreFieldMapping {
         product.setName(name);
         product.setDescription(description);
         product.setPrice(price);
-        applyCategories(product, categories, legacyCategory);
+        product.setCategories(categories);
         product.setBrand(brand);
-        product.setImageUrl(imageUrl);
+        product.setImageUrls(imageUrls);
         product.setRating(rating);
         product.setAttributes(attributes);
-        applyStock(product, inStock, stockQuantity);
+        product.setInStock(inStock != null ? inStock : false);
         product.setVersion(version);
         product.setUpdatedAt(updatedAt);
-    }
-
-    private static void applyCategories(Product product, List<String> categories, String legacyCategory) {
-        if (categories != null && !categories.isEmpty()) {
-            product.setCategories(categories);
-        } else if (legacyCategory != null) {
-            product.setCategories(Collections.singletonList(legacyCategory));
-        } else {
-            product.setCategories(Collections.emptyList());
-        }
-    }
-
-    private static void applyStock(Product product, Boolean inStock, Integer stockQuantity) {
-        product.setInStock(Objects.requireNonNullElseGet(inStock, () -> stockQuantity != null && stockQuantity > 0));
     }
 }

@@ -17,12 +17,11 @@ public class FirestoreToProductMapper {
     private static final String FIELD_NAME = "name";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_PRICE = "price";
-    private static final String FIELD_CATEGORY = "category";
     private static final String FIELD_CATEGORIES = "categories";
     private static final String FIELD_STOCK_QUANTITY = "stockQuantity";
     private static final String FIELD_IN_STOCK = "inStock";
     private static final String FIELD_BRAND = "brand";
-    private static final String FIELD_IMAGE_URL = "imageUrl";
+    private static final String FIELD_IMAGE_URLS = "imageUrls";
     private static final String FIELD_RATING = "rating";
     private static final String FIELD_ATTRIBUTES = "attributes";
 
@@ -52,24 +51,14 @@ public class FirestoreToProductMapper {
         product.setDescription(getString(fields, FIELD_DESCRIPTION));
         product.setPrice(getDouble(fields, FIELD_PRICE));
 
-        List<String> categories = getStringList(fields, FIELD_CATEGORIES);
-        if (categories == null || categories.isEmpty()) {
-            String category = getString(fields, FIELD_CATEGORY);
-            categories = category != null ? List.of(category) : Collections.emptyList();
-        }
-        product.setCategories(categories);
+        product.setCategories(getStringList(fields, FIELD_CATEGORIES));
 
         product.setBrand(getString(fields, FIELD_BRAND));
-        product.setImageUrl(getString(fields, FIELD_IMAGE_URL));
+        product.setImageUrls(getStringList(fields, FIELD_IMAGE_URLS));
         product.setRating(getDouble(fields, FIELD_RATING));
 
         FirestoreValue inStockVal = fields.get(FIELD_IN_STOCK);
-        if (inStockVal != null && inStockVal.getBoolean() != null) {
-            product.setInStock(Boolean.TRUE.equals(inStockVal.getBoolean()));
-        } else {
-            Integer stockQty = getInteger(fields, FIELD_STOCK_QUANTITY);
-            product.setInStock(stockQty != null && stockQty > 0);
-        }
+        product.setInStock(inStockVal != null && Boolean.TRUE.equals(inStockVal.getBoolean()));
 
         product.setAttributes(getMapValue(fields, FIELD_ATTRIBUTES));
 

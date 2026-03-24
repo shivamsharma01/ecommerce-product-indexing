@@ -40,7 +40,7 @@ public class Product {
     private Double price;
 
     @Field(type = FieldType.Keyword)
-    private String imageUrl;
+    private List<String> imageUrls;
 
     @Field(type = FieldType.Double)
     private Double rating;
