@@ -23,6 +23,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/health", "/health/**").permitAll()
+                        // Reindex is more sensitive than read-only admin endpoints.
+                        .requestMatchers("/product-indexer/admin/reindex")
+                                .hasAuthority("SCOPE_reindex")
                         .requestMatchers("/product-indexer/admin", "/product-indexer/admin/**")
                                 .hasAuthority("SCOPE_product.admin")
                         .anyRequest().permitAll())

@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: product-indexer
+  cloud:
+    gcp:
+      firestore:
+        enabled: ${SPRING_CLOUD_GCP_FIRESTORE_ENABLED:true}
+      project-id: ${SPRING_CLOUD_GCP_PROJECT_ID:my-project-chat-ai-487408}
+      credentials:
+        location: ${SPRING_CLOUD_GCP_CREDENTIALS_LOCATION:}
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+  data:
+    elasticsearch:
+      auto-index-creation: true
+      repositories:
+        enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8081}
+
+server:
+  port: ${SERVER_PORT:8085}
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    elasticsearch:
+      enabled: true
+
+product-indexer:
+  pubsub:
+    enabled: ${PRODUCT_INDEXER_PUBSUB_ENABLED:true}
+    subscription: ${PRODUCT_INDEXER_PUBSUB_SUBSCRIPTION:product-events-sub}
