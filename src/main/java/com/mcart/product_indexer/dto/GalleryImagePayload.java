@@ -1,0 +1,15 @@
+package com.mcart.product_indexer.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class GalleryImagePayload {
+    private String thumbnailUrl;
+    private String hdUrl;
+    private String alt;
+}
+
