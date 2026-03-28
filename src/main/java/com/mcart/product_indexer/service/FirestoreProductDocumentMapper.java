@@ -21,7 +21,7 @@ public class FirestoreProductDocumentMapper {
                 doc.getPrice(),
                 doc.getCategories(),
                 doc.getBrand(),
-                doc.getImageUrls(),
+                doc.getGallery(),
                 doc.getRating(),
                 doc.getAttributes(),
                 doc.getInStock(),

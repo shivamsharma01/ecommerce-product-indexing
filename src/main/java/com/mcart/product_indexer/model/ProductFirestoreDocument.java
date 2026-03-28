@@ -26,7 +26,7 @@ public class ProductFirestoreDocument {
     private Integer stockQuantity;
     private List<String> categories;
     private String brand;
-    private List<String> imageUrls;
+    private List<ProductGalleryImage> gallery;
     private Double rating;
     private Map<String, Object> attributes;
     private Boolean inStock;

@@ -27,7 +27,7 @@ public class ProductEventPayload {
     private List<String> categories;
 
     private String brand;
-    private List<String> imageUrls;
+    private List<GalleryImagePayload> gallery;
     private Double rating;
     private Boolean inStock;
     private Map<String, Object> attributes;

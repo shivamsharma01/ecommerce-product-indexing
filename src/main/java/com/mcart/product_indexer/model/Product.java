@@ -39,8 +39,8 @@ public class Product {
     @Field(type = FieldType.Double)
     private Double price;
 
-    @Field(type = FieldType.Keyword)
-    private List<String> imageUrls;
+    @Field(type = FieldType.Nested)
+    private List<ProductGalleryImage> gallery;
 
     @Field(type = FieldType.Double)
     private Double rating;

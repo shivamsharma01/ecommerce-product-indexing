@@ -3,8 +3,10 @@ package com.mcart.product_indexer.service;
 import com.mcart.product_indexer.dto.FirestoreDocument;
 import com.mcart.product_indexer.dto.FirestoreValue;
 import com.mcart.product_indexer.model.Product;
+import com.mcart.product_indexer.model.ProductGalleryImage;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public class FirestoreToProductMapper {
     private static final String FIELD_STOCK_QUANTITY = "stockQuantity";
     private static final String FIELD_IN_STOCK = "inStock";
     private static final String FIELD_BRAND = "brand";
-    private static final String FIELD_IMAGE_URLS = "imageUrls";
+    private static final String FIELD_GALLERY = "gallery";
     private static final String FIELD_RATING = "rating";
     private static final String FIELD_ATTRIBUTES = "attributes";
 
@@ -54,7 +56,7 @@ public class FirestoreToProductMapper {
         product.setCategories(getStringList(fields, FIELD_CATEGORIES));
 
         product.setBrand(getString(fields, FIELD_BRAND));
-        product.setImageUrls(getStringList(fields, FIELD_IMAGE_URLS));
+        product.setGallery(getGalleryList(fields, FIELD_GALLERY));
         product.setRating(getDouble(fields, FIELD_RATING));
 
         FirestoreValue inStockVal = fields.get(FIELD_IN_STOCK);
@@ -98,6 +100,26 @@ public class FirestoreToProductMapper {
                 .map(FirestoreValue::getString)
                 .filter(s -> s != null)
                 .collect(Collectors.toList());
+    }
+
+    private List<ProductGalleryImage> getGalleryList(Map<String, FirestoreValue> fields, String key) {
+        FirestoreValue v = fields.get(key);
+        if (v == null || v.getArrayValue() == null || v.getArrayValue().getValues() == null) {
+            return List.of();
+        }
+        List<ProductGalleryImage> out = new ArrayList<>();
+        for (FirestoreValue item : v.getArrayValue().getValues()) {
+            if (item == null || item.getMapValue() == null || item.getMapValue().getFields() == null) {
+                continue;
+            }
+            Map<String, FirestoreValue> map = item.getMapValue().getFields();
+            ProductGalleryImage image = new ProductGalleryImage();
+            image.setThumbnailUrl(getString(map, "thumbnailUrl"));
+            image.setHdUrl(getString(map, "hdUrl"));
+            image.setAlt(getString(map, "alt"));
+            out.add(image);
+        }
+        return out;
     }
 
     private Map<String, Object> getMapValue(Map<String, FirestoreValue> fields, String key) {

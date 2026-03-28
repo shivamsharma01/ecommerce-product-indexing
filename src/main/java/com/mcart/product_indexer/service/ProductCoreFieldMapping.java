@@ -1,6 +1,7 @@
 package com.mcart.product_indexer.service;
 
 import com.mcart.product_indexer.model.Product;
+import com.mcart.product_indexer.model.ProductGalleryImage;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,7 +19,7 @@ final class ProductCoreFieldMapping {
             Double price,
             List<String> categories,
             String brand,
-            List<String> imageUrls,
+            List<ProductGalleryImage> gallery,
             Double rating,
             Map<String, Object> attributes,
             Boolean inStock,
@@ -30,7 +31,7 @@ final class ProductCoreFieldMapping {
         product.setPrice(price);
         product.setCategories(categories);
         product.setBrand(brand);
-        product.setImageUrls(imageUrls);
+        product.setGallery(gallery);
         product.setRating(rating);
         product.setAttributes(attributes);
         product.setInStock(inStock != null ? inStock : false);
