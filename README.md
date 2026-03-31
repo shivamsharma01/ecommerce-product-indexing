@@ -1,11 +1,11 @@
 # Product indexer
 
-Consumes **product-events** from Pub/Sub, upserts/deletes documents in **Elasticsearch**, and can run a full **reindex** from **Firestore**. The search service reads the same `products` index.
+Consumes **product-events** from Pub/Sub, upserts/deletes documents in **OpenSearch** (Elasticsearch-compatible REST API), and can run a full **reindex** from **Firestore**. The search service reads the same `products` index.
 
 ## Requirements
 
 - Java 17
-- Running Elasticsearch, reachable Firestore/Pub/Sub in deployed environments
+- Running OpenSearch, reachable Firestore/Pub/Sub in deployed environments
 
 ## Run locally
 
@@ -15,7 +15,7 @@ Consumes **product-events** from Pub/Sub, upserts/deletes documents in **Elastic
 
 | Variable | Purpose |
 |----------|---------|
-| `SPRING_ELASTICSEARCH_URIS` | ES cluster URL |
+| `OPENSEARCH_URIS` | OpenSearch URL(s) |
 | `GCP_PROJECT_ID` | GCP project |
 | `SPRING_CLOUD_GCP_FIRESTORE_ENABLED` | Firestore client |
 | `PRODUCT_INDEXER_PUBSUB_ENABLED` | Start subscriber (`true` in prod) |
@@ -35,8 +35,8 @@ Smoke test loads the Spring context with Firestore/Pub/Sub disabled and mocked i
 
 ## GCP
 
-Typical IAM: Pub/Sub subscriber on the subscription, Firestore reader, network access to Elasticsearch. See Terraform in `ecomm-infra/terraform` for topics/subscriptions.
+Typical IAM: Pub/Sub subscriber on the subscription, Firestore reader, network access to OpenSearch. See Terraform in `ecomm-infra/terraform` for topics/subscriptions.
 
 ## Kubernetes
 
-Manifests under **`ecomm-infra/deploy/k8s/apps/product-indexer/`** (ServiceAccount, Deployment, Service, ConfigMap; optional `secret.yaml` from `secret.example.yaml` for ES credentials).
+Manifests under **`ecomm-infra/deploy/k8s/apps/product-indexer/`** (ServiceAccount, Deployment, Service, ConfigMap; optional `secret.yaml` from `secret.example.yaml` for OpenSearch credentials).

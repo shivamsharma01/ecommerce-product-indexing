@@ -8,8 +8,6 @@ spring:
       project-id: ${SPRING_CLOUD_GCP_PROJECT_ID:}
       credentials:
         location: ${SPRING_CLOUD_GCP_CREDENTIALS_LOCATION:}
-  elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
   data:
     elasticsearch:
       auto-index-creation: true
@@ -20,6 +18,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8081}
+
+opensearch:
+  uris: ${OPENSEARCH_URIS:${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}} # bridge for older envs
+  username: ${OPENSEARCH_USERNAME:${SPRING_ELASTICSEARCH_USERNAME:}}
+  password: ${OPENSEARCH_PASSWORD:${SPRING_ELASTICSEARCH_PASSWORD:}}
 
 server:
   port: ${SERVER_PORT:8085}
@@ -36,7 +39,7 @@ management:
       probes:
         enabled: true
   health:
-    elasticsearch:
+    opensearch:
       enabled: true
 
 product-indexer:

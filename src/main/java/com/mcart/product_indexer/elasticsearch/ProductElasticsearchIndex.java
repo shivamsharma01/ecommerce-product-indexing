@@ -4,6 +4,7 @@ import com.mcart.product_indexer.model.Product;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
@@ -25,10 +26,16 @@ public class ProductElasticsearchIndex {
 
     @PostConstruct
     void ensureIndexExists() {
-        IndexOperations indexOps = indexOperations();
-        if (!indexOps.exists()) {
-            indexOps.createWithMapping();
-            log.info("Created Elasticsearch index: {}", Product.INDEX_NAME);
+        try {
+            IndexOperations indexOps = indexOperations();
+            if (!indexOps.exists()) {
+                indexOps.createWithMapping();
+                log.info("Created OpenSearch index: {}", Product.INDEX_NAME);
+            }
+        } catch (DataAccessException e) {
+            // Don't fail the whole service on startup if OpenSearch is down/misconfigured.
+            log.warn("OpenSearch not ready; skipping index ensure on startup (index={}): {}",
+                    Product.INDEX_NAME, e.getMessage());
         }
     }
 

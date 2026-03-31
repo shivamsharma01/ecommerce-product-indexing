@@ -7,6 +7,7 @@ import com.mcart.product_indexer.model.ProductFirestoreDocument;
 import com.mcart.product_indexer.repository.ProductFirestoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +55,9 @@ public class ReindexService {
             }
             log.info("Reindex complete: indexed {} products, {} failed", indexed, failed);
             return new ReindexResult(indexed, failed);
+        } catch (DataAccessException e) {
+            log.error("OpenSearch unavailable; cannot reindex: {}", e.getMessage());
+            throw e;
         } finally {
             reindexGate.setReindexInProgress(false);
         }
