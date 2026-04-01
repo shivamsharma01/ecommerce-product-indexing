@@ -37,7 +37,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-json'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.opensearch.client:spring-data-opensearch-starter:1.4.0'
+	// Sniffer discovers data-node URLs from the cluster; those are often unroutable in K8s (pod IPs).
+	// We use a stable ClusterIP service — exclude sniffer to avoid periodic ConnectionClosedException noise.
+	implementation('org.opensearch.client:spring-data-opensearch-starter:1.4.0') {
+		exclude group: 'org.opensearch.client', module: 'opensearch-rest-client-sniffer'
+	}
 	implementation 'org.opensearch.client:spring-data-opensearch:1.4.0'
 	implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub'
 	implementation 'com.google.cloud:spring-cloud-gcp-starter-data-firestore'
