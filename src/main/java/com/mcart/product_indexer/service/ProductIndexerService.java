@@ -76,6 +76,7 @@ public class ProductIndexerService {
         String eventType = envelope.getEventType();
         if ("PRODUCT_DELETED".equals(eventType)) {
             productIndex.deleteById(productId);
+            log.info("Removed product from search index productId={}", productId);
             return true;
         }
 
