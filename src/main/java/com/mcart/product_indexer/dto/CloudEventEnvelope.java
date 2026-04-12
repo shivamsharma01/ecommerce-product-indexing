@@ -5,10 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * CloudEvent envelope as delivered by Eventarc to Pub/Sub.
- * See: https://cloud.google.com/eventarc/docs/cloudevents-json
- */
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

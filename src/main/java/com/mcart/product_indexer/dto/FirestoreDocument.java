@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-/**
- * Firestore Document with fields as Map of field name to Value.
- * Value types: stringValue, integerValue, doubleValue, booleanValue, etc.
- */
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

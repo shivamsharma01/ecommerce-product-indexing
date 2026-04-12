@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Firestore field value - supports various value types.
- */
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

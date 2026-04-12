@@ -5,11 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Firestore DocumentEventData from google.events.cloud.firestore.v1.
- * value: post-operation document (null for deletes)
- * old_value: pre-operation document (for updates/deletes)
- */
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

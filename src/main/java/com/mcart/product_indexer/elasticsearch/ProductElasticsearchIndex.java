@@ -33,7 +33,6 @@ public class ProductElasticsearchIndex {
                 log.info("Created OpenSearch index: {}", Product.INDEX_NAME);
             }
         } catch (DataAccessException e) {
-            // Don't fail the whole service on startup if OpenSearch is down/misconfigured.
             log.warn("OpenSearch not ready; skipping index ensure on startup (index={}): {}",
                     Product.INDEX_NAME, e.getMessage());
         }
